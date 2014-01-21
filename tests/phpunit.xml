@@ -2,10 +2,10 @@
 <phpunit bootstrap="./bootstrap.php" colors="true">
     <testsuites>
         <testsuite name="unit">
-            <directory>./StefanoNestedTransationTest/Unit</directory>
+            <directory>./StefanoNestedTransactionTest/Unit</directory>
         </testsuite>
         <testsuite name="integration">
-            <directory>./StefanoNestedTransationTest/Integration</directory>
+            <directory>./StefanoNestedTransactionTest/Integration</directory>
         </testsuite>
     </testsuites>
     <filter>
