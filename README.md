@@ -11,3 +11,71 @@ Instalation using Composer
 
 Features
 ------------
+
+- manages nested transaction
+
+Usage
+------
+
+- Configuration
+
+```
+//$transactionAdapter implements \StefanoNestedTransaction\Adapter\TransactionInterface
+$transactionAdapter = new YourTransactionAdapter();
+
+$transactionManager = new \StefanoNestedTransaction\TransactionManager($transactionAdapter);
+```
+
+- Example: normal flow
+
+```
+$transactionManager->begin(); //REAL start transaction
+try {
+    // ...
+
+    //nested transaction block, that might be in some other code
+    $transactionManager->begin(); //increase internal transaction counter
+    try {
+        // ...
+
+        $transactionManager->commit(); //decrease internal transaction counter
+    } catch(\Exception $e) {
+        $transactionManager->rollback(); //do nothing
+        throw $e->getPrevious();
+    }
+
+    // ...
+    $transactionManager->commit(); //REAL commit transaction;
+} catch(\Exception $e) {
+    $transactionManager->rollback(); //do nothing
+    throw $e->getPrevious();
+}
+```
+
+- Example: throw exception
+
+```
+$transactionManager->begin(); //REAL start transaction
+try {
+    // ...
+
+    //nested transaction block, that might be in some other code
+    $transactionManager->begin(); //increase internal transaction counter
+    try {
+        // ...
+
+        throw new \Exception();
+        
+        $transactionManager->commit(); //do nothing
+    } catch(\Exception $e) {
+        $transactionManager->rollback(); //REAL rollback
+        throw $e->getPrevious();
+    }
+
+    // ...
+    $transactionManager->commit(); //do nothing
+} catch(\Exception $e) {
+    $transactionManager->rollback(); //do nothing
+    throw $e->getPrevious();
+}
+```
