@@ -40,14 +40,14 @@ try {
 
         $transactionManager->commit(); //decrease internal transaction counter
     } catch(\Exception $e) {
-        $transactionManager->rollback(); //do nothing
+        $transactionManager->rollback(); //skipped
         throw $e->getPrevious();
     }
 
     // ...
     $transactionManager->commit(); //REAL commit transaction;
 } catch(\Exception $e) {
-    $transactionManager->rollback(); //do nothing
+    $transactionManager->rollback(); //skipped
     throw $e->getPrevious();
 }
 ```
@@ -65,17 +65,44 @@ try {
         // ...
 
         throw new \Exception();
-        
-        $transactionManager->commit(); //do nothing
+
+        $transactionManager->commit(); //skipped
     } catch(\Exception $e) {
-        $transactionManager->rollback(); //REAL rollback
+        $transactionManager->rollback(); //marked as rollback only
         throw $e->getPrevious();
     }
 
     // ...
-    $transactionManager->commit(); //do nothing
+    $transactionManager->commit(); //skipped
 } catch(\Exception $e) {
-    $transactionManager->rollback(); //do nothing
+    $transactionManager->rollback(); //REAL rollback
+    throw $e->getPrevious();
+}
+```
+
+- Example: throw exception
+
+```
+$transactionManager->begin(); //REAL start transaction
+try {
+    // ...
+
+    //nested transaction block, that might be in some other code
+    $transactionManager->begin(); //increase internal transaction counter
+    try {
+        // ...
+
+        throw new \Exception();
+
+        $transactionManager->commit(); //do nothing
+    } catch(\Exception $e) {
+        $transactionManager->rollback(); //marked as rollback only
+    }
+
+    // ...
+    $transactionManager->commit(); //this throw exception because transaction is marked as rollback only
+} catch(\Exception $e) {
+    $transactionManager->rollback(); //REAL rollback
     throw $e->getPrevious();
 }
 ```

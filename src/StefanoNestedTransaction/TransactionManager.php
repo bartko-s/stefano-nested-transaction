@@ -3,12 +3,14 @@ namespace StefanoNestedTransaction;
 
 use StefanoNestedTransaction\Adapter\TransactionInterface as TransactionAdapterInterface;
 use StefanoNestedTransaction\TransactionManagerInterface;
+use StefanoNestedTransaction\Exception\LogicException;
 
 class TransactionManager
     implements TransactionManagerInterface
 {
     private $transactionAdapter;
     private $numberOfOpenedTransaction = 0;
+    private $isMarkedAsRollbackOnly = false;
 
     public function __construct(TransactionAdapterInterface $transactionAdapter) {
         $this->transactionAdapter = $transactionAdapter;
@@ -26,25 +28,38 @@ class TransactionManager
     }
 
     public function commit() {
+        if($this->isMarkedAsRollbackOnly()) {
+            throw new LogicException('This transaction has been marked as rollback only');
+        }
+
+        if(0 == $this->getNumberOfOpenedTransaction()) {
+            throw new LogicException('No active transaction');
+        }
+
         if(1 == $this->getNumberOfOpenedTransaction()) {
             $this->getTransactionAdapter()
                  ->commit();
         }
 
-        if(0 < $this->getNumberOfOpenedTransaction()) {
-            $this->decreaseNumberOfOpenedTransaction();
-        }
-
+        $this->decreaseNumberOfOpenedTransaction();
+        
         return $this;
     }
 
     public function rollback() {
-        if(1 <= $this->getNumberOfOpenedTransaction()) {
-            $this->getTransactionAdapter()
-                 ->rollback();
+        if(0 == $this->getNumberOfOpenedTransaction()) {
+            throw new LogicException('No active transaction');
         }
 
-        $this->resetNumberOfOpenedTransaction();
+        if(1 == $this->getNumberOfOpenedTransaction()) {
+            $this->getTransactionAdapter()
+                 ->rollback();
+            $this->markAsRollbackOnly(false);
+        }  else {
+            $this->markAsRollbackOnly(true);
+        }
+
+        $this->decreaseNumberOfOpenedTransaction();
 
         return $this;
     }
@@ -72,15 +87,25 @@ class TransactionManager
         return $this->numberOfOpenedTransaction;
     }
 
-    private function resetNumberOfOpenedTransaction() {
-        $this->numberOfOpenedTransaction = 0;
-    }
-
     private function increaseNumberOfOpenedTransaction() {
         $this->numberOfOpenedTransaction++;
     }
 
     private function decreaseNumberOfOpenedTransaction() {
         $this->numberOfOpenedTransaction--;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isMarkedAsRollBackOnly() {
+        return $this->isMarkedAsRollbackOnly;
+    }
+
+    /**
+     * @param bool $bool
+     */
+    private function markAsRollbackOnly($bool) {
+        $this->isMarkedAsRollbackOnly = (bool) $bool;
     }
 }
