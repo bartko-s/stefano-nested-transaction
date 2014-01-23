@@ -1,7 +1,7 @@
 {
     "name": "stefano/stefano-nested-transaction",
     "description": "Nested Transaction Manager",
-    "version": "0.0.2",
+    "version": "0.0.3-dev",
     "license": "BSD-3-Clause",    
     "keywords": [
         "Db Transaction",
