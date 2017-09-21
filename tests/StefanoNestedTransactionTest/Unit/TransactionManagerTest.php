@@ -1,11 +1,13 @@
 <?php
 namespace StefanoNestedTransactionTest\Unit;
 
+use StefanoNestedTransaction\Exception\LogicException;
 use StefanoNestedTransaction\TransactionManager;
+use StefanoNestedTransactionTest\TestCase;
 use StefanoNestedTransactionTest\Unit\Dummy\Adapter;
 
 class TransactionManagerTest
-    extends \PHPUnit_Framework_TestCase
+    extends TestCase
 {
     protected function tearDown() {
         \Mockery::close();
@@ -35,8 +37,8 @@ class TransactionManagerTest
     public function testThrowExceptionIfYouTryCommitTransactionAndTransactionIsNotActive() {
         $transactionManager = new TransactionManager(new Adapter());
 
-        $this->setExpectedException('\StefanoNestedTransaction\Exception\LogicException',
-            'No active transaction');
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('No active transaction');
 
         $transactionManager->commit();
     }
@@ -55,8 +57,8 @@ class TransactionManagerTest
     public function testThrowExceptionIfYouTryRollbackTransactionAndTransactionIsNotActive() {
         $transactionManager = new TransactionManager(new Adapter());
 
-        $this->setExpectedException('\StefanoNestedTransaction\Exception\LogicException',
-            'No active transaction');
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('No active transaction');
 
         $transactionManager->rollback();
     }
@@ -147,11 +149,11 @@ class TransactionManagerTest
                            ->rollback();
     }
 
-    public function testThrowExeptionIfYouTryCommitTransactionWhitchHasBeenMarkedAsRollback() {
+    public function testThrowExceptionIfYouTryCommitTransactionWhichHasBeenMarkedAsRollback() {
         $transactionManager = new TransactionManager(new Adapter());
 
-        $this->setExpectedException('\StefanoNestedTransaction\Exception\LogicException',
-            'This transaction has been marked as rollback only');
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('This transaction has been marked as rollback only');
 
         $transactionManager->begin()
                            ->begin()
@@ -172,7 +174,7 @@ class TransactionManagerTest
         $transactionManager->commit();
         $this->assertFalse($transactionManager->isInTransaction());
 
-        //begin roolback
+        //begin rollback
         $this->assertFalse($transactionManager->isInTransaction());
         $transactionManager->begin();
         $this->assertTrue($transactionManager->isInTransaction());
