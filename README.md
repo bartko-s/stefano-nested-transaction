@@ -7,7 +7,7 @@ Stefano Nested Transaction
 
 Instalation using Composer
 --------------------------
-1. Add following line to your composer.json  ``` "stefano/stefano-nested-transaction": "*" ```
+1. Run command  ``` composer require stefano/stefano-nested-transaction```
 
 Features
 ------------
