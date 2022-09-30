@@ -4,9 +4,6 @@
         <testsuite name="unit">
             <directory>./StefanoNestedTransactionTest/Unit</directory>
         </testsuite>
-        <testsuite name="integration">
-            <directory>./StefanoNestedTransactionTest/Integration</directory>
-        </testsuite>
     </testsuites>
     <filter>
         <whitelist>

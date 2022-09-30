@@ -9,7 +9,7 @@ use StefanoNestedTransactionTest\Unit\Dummy\Adapter;
 class TransactionManagerTest
     extends TestCase
 {
-    protected function tearDown() {
+    protected function tearDown(): void {
         \Mockery::close();
     }
 
